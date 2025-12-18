@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useRegisterMutation } from "@/services/api";
 import { useNavigate } from "react-router-dom";
-import { Spinner } from "@/components/ui/spinner"
+import { Spinner } from "@/components/ui/spinner";
 
 export default function RegisterForm({ onSwitch }) {
   const navigate = useNavigate();
@@ -70,7 +70,6 @@ export default function RegisterForm({ onSwitch }) {
 
       // setelah register → selalu ke OTP
       navigate("/otp", { state: { email } });
-
     } catch (err) {
       console.error("Registration error:", err);
     }
@@ -96,7 +95,9 @@ export default function RegisterForm({ onSwitch }) {
               }
             />
             {submitted && !firstName && (
-              <p className="text-sm text-red-600 mt-1">Nama depan wajib diisi</p>
+              <p className="mt-1 text-sm text-red-600">
+                Nama depan wajib diisi
+              </p>
             )}
           </div>
 
@@ -113,7 +114,9 @@ export default function RegisterForm({ onSwitch }) {
               }
             />
             {submitted && !lastName && (
-              <p className="text-sm text-red-600 mt-1">Nama belakang wajib diisi</p>
+              <p className="mt-1 text-sm text-red-600">
+                Nama belakang wajib diisi
+              </p>
             )}
           </div>
         </div>
@@ -131,7 +134,7 @@ export default function RegisterForm({ onSwitch }) {
           }
         />
         {submitted && (!phone || !phoneValid) && (
-          <p className="text-sm text-red-600 mt-1">
+          <p className="mt-1 text-sm text-red-600">
             {phone ? "Nomor HP hanya boleh angka" : "Nomor HP wajib diisi"}
           </p>
         )}
@@ -149,7 +152,7 @@ export default function RegisterForm({ onSwitch }) {
           }
         />
         {submitted && (!email || !emailValid) && (
-          <p className="text-sm text-red-600 mt-1">
+          <p className="mt-1 text-sm text-red-600">
             {email ? "Format email tidak valid" : "Email wajib diisi"}
           </p>
         )}
@@ -199,19 +202,21 @@ export default function RegisterForm({ onSwitch }) {
         )}
 
         <Button
-          className="h-12 w-full cursor-pointer"
+          className="h-12 w-full"
           onClick={handleSubmit}
           disabled={isLoading}
         >
-        <Spinner />
-          {isLoading ? "Processing..." : "Daftar"}
+          {isLoading ? (
+            <>
+              <Spinner className="text-white" />
+              Processing...
+            </>
+          ) : (
+            "Daftar"
+          )}
         </Button>
 
-        <Button
-          variant="ghost"
-          className="w-full md:hidden"
-          onClick={onSwitch}
-        >
+        <Button variant="ghost" className="w-full md:hidden" onClick={onSwitch}>
           Sudah punya akun? Login
         </Button>
       </div>
