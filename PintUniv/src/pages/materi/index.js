@@ -1,0 +1,71 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import MainLayout from "@/components/layout/MainLayout";
+import { useGetPracticeTestsQuery, useLazyGetMateriQuery } from "@/services/api";
+export default function Materi() {
+    const navigate = useNavigate();
+    const [recent, setRecent] = useState([]);
+    const [colorsMap, setColorsMap] = useState({});
+    const [materiByPractice, setMateriByPractice] = useState({});
+    const scrollRefs = useRef({});
+    // Fetch practice list
+    const { data: practice, isLoading, error } = useGetPracticeTestsQuery(undefined);
+    // Lazy query for materi
+    const [triggerMateri] = useLazyGetMateriQuery();
+    // Load materi after practice arrives
+    useEffect(() => {
+        const loadMateri = async () => {
+            if (!practice)
+                return;
+            const materiTemp = {};
+            for (const p of practice) {
+                const res = await triggerMateri(p.id, true);
+                materiTemp[p.id] = res.data ?? [];
+            }
+            setMateriByPractice(materiTemp);
+        };
+        loadMateri();
+    }, [practice, triggerMateri]);
+    // Load localStorage
+    useEffect(() => {
+        const storedRecent = localStorage.getItem("recent");
+        if (storedRecent)
+            setRecent(JSON.parse(storedRecent));
+        const storedColors = localStorage.getItem("materiColors");
+        if (storedColors)
+            setColorsMap(JSON.parse(storedColors));
+    }, []);
+    const colors = ["#E8F5E9", "#F5E8E8", "#E8EAF5", "#F4E8F5"];
+    // Assign color
+    const getColor = (id) => {
+        if (!colorsMap[id]) {
+            const random = colors[Math.floor(Math.random() * colors.length)];
+            const updated = { ...colorsMap, [id]: random };
+            setColorsMap(updated);
+            localStorage.setItem("materiColors", JSON.stringify(updated));
+        }
+        return colorsMap[id];
+    };
+    const handleClickMateri = (id, title) => {
+        navigate(`/materi/${id}`);
+        const updated = [
+            { id, judul_materi: title },
+            ...recent.filter((x) => x.id !== id),
+        ].slice(0, 10);
+        setRecent(updated);
+        localStorage.setItem("recent", JSON.stringify(updated));
+    };
+    const scrollLeft = (key) => scrollRefs.current[key]?.scrollBy({ left: -220, behavior: "smooth" });
+    const scrollRight = (key) => scrollRefs.current[key]?.scrollBy({ left: 220, behavior: "smooth" });
+    const renderCategory = (title, items, key) => (_jsxs("div", { className: "mb-8", children: [_jsxs("div", { className: "flex justify-between items-center mb-3", children: [_jsx("h3", { className: "font-semibold text-lg", children: title }), _jsxs("div", { className: "flex gap-2", children: [_jsx("button", { onClick: () => scrollLeft(key), className: "text-xl", children: "\u2039" }), _jsx("button", { onClick: () => scrollRight(key), className: "text-xl", children: "\u203A" })] })] }), _jsx("div", { ref: (el) => {
+                    scrollRefs.current[key] = el;
+                    return undefined;
+                }, className: "flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden", children: items.map((m) => (_jsxs("div", { className: "w-52 h-28 p-3 rounded-lg flex flex-col justify-between flex-shrink-0 border ", style: { backgroundColor: getColor(m.id) }, children: [_jsx("strong", { className: "block text-sm max-h-12 overflow-hidden", children: m.judul_materi }), _jsx("button", { onClick: () => handleClickMateri(m.id, m.judul_materi), className: "bg-[#152D64] text-white px-3 py-1 rounded-md text-sm w-24 self-center", children: "Start" })] }, m.id))) })] }, key));
+    if (isLoading)
+        return (_jsx(MainLayout, { children: _jsx("div", { className: "flex justify-center py-20", children: "Loading..." }) }));
+    if (error)
+        return (_jsx(MainLayout, { children: _jsx("p", { className: "text-red-600", children: "Gagal memuat data." }) }));
+    return (_jsxs(MainLayout, { children: [_jsx("h1", { className: "text-2xl font-bold mb-6", children: "Materi" }), recent.length > 0 &&
+                renderCategory("Recent", recent, "recent"), _jsx("div", { className: "mb-6", children: _jsx("input", { type: "text", placeholder: "Search materi...", className: "w-full p-3 border rounded-lg" }) }), practice?.map((p) => renderCategory(p.title_practice, materiByPractice[p.id] ?? [], p.id))] }));
+}
