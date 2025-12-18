@@ -7,7 +7,7 @@ export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
 
   return (
-    <div className="relative flex h-screen w-full overflow-hidden bg-gray-100">
+    <div className="bg-background text-foreground relative flex h-screen w-full overflow-hidden">
       {/* ==== MOBILE VIEW ==== */}
       <div className="flex h-full w-full items-center justify-center px-6 md:hidden">
         {mode === "login" ? (
@@ -35,7 +35,7 @@ export default function AuthPage() {
 
         {/* ==== BLUE SLIDER PANEL ==== */}
         <div
-          className={`absolute top-0 left-0 flex h-full w-1/2 flex-col items-center justify-center bg-[#152D64] p-10 text-white transition-transform duration-700 ease-out ${mode === "login" ? "translate-x-full" : "translate-x-0"} `}
+          className={`bg-primary text-primary-foreground absolute top-0 left-0 flex h-full w-1/2 flex-col items-center justify-center p-10 text-white transition-transform duration-700 ease-out ${mode === "login" ? "translate-x-full" : "translate-x-0"} `}
           style={{ zIndex: 40 }}
         >
           {mode === "login" ? (

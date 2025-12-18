@@ -1,11 +1,16 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import InputField from "@/components/form/InputField";
 import PasswordField from "@/components/form/PasswordField";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 import { useLoginMutation, useMeMutation } from "@/services/api";
+import { Spinner } from "@/components/ui/spinner";
 
-export default function LoginForm({ onSwitch }) {
+type LoginFormProps = {
+  onSwitch?: () => void;
+};
+
+export default function LoginForm({ onSwitch }: LoginFormProps) {
   const navigate = useNavigate();
 
   const [login, { isLoading }] = useLoginMutation();
@@ -15,22 +20,32 @@ export default function LoginForm({ onSwitch }) {
   const [password, setPassword] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const emailEmpty = submitted && email.trim() === "";
-  const emailInvalid = submitted && email.trim() !== "" && !email.includes("@");
-  const passwordError = submitted && password.trim() === "";
+  /* ================= VALIDATION ================= */
+  const isEmailEmpty = submitted && !email.trim();
+  const isEmailInvalid =
+    submitted && email.trim() !== "" && !email.includes("@");
+  const isPasswordEmpty = submitted && !password.trim();
 
+  const isFormInvalid = isEmailEmpty || isEmailInvalid || isPasswordEmpty;
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (serverError) setServerError(null);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (serverError) setServerError(null);
+  };
+
+  /* ================= HANDLER ================= */
   const handleLogin = async () => {
     setSubmitted(true);
-
-    if (!email || !password || !email.includes("@")) return;
+    if (isFormInvalid) return;
 
     try {
-      const res = (await login({ email, password }).unwrap()) as {
-        access: string;
-        refresh: string;
-        email: string;
-        need_otp?: boolean;
-      };
+      const res = await login({ email, password }).unwrap();
 
       if (res.need_otp) {
         navigate("/otp", { state: { email: res.email } });
@@ -40,72 +55,61 @@ export default function LoginForm({ onSwitch }) {
       localStorage.setItem("token", res.access);
       localStorage.setItem("refresh_token", res.refresh);
 
-      // 🔥 fetch user via /me/
       const user = await me().unwrap();
-
       localStorage.setItem("user", JSON.stringify(user));
 
-      // 🔥 role-based redirect
-      if (user.is_staff) {
-        navigate("/dashboard_admin", { replace: true });
-      } else {
-        navigate("/dashboard_user", { replace: true });
-      }
-    } catch (err) {
-      console.error("Login error:", err);
+      navigate(user.is_staff ? "/dashboard_admin" : "/dashboard_user", {
+        replace: true,
+      });
+    } catch (error: any) {
+      const message = error?.data?.detail || "Email atau password salah";
+
+      setServerError(message);
     }
   };
 
+  /* ================= RENDER ================= */
   return (
     <div className="animate-slideInLeft w-full max-w-md">
       <h1 className="mb-6 text-3xl font-bold">Login</h1>
 
       <div className="space-y-4">
         {/* EMAIL */}
-        <div>
-          <InputField
-            label="Email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={
-              emailEmpty || emailInvalid
-                ? "border-red-500 focus-visible:ring-red-500"
-                : ""
-            }
-          />
-
-          {emailEmpty && (
-            <p className="text-sm text-red-600 mt-1">Email wajib diisi</p>
-          )}
-          {!emailEmpty && emailInvalid && (
-            <p className="text-sm text-red-600 mt-1">
-              Format email tidak valid
-            </p>
-          )}
-        </div>
+        <InputField
+          label="Email"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={isEmailEmpty || isEmailInvalid}
+          helperText={
+            isEmailEmpty
+              ? "Email wajib diisi"
+              : isEmailInvalid
+                ? "Format email tidak valid"
+                : undefined
+          }
+        />
 
         {/* PASSWORD */}
-        <div>
-          <PasswordField
-            label="Password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={
-              passwordError
-                ? "border-red-500 focus-visible:ring-red-500"
-                : ""
-            }
-          />
+        <PasswordField
+          label="Password"
+          placeholder="Enter your password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={isPasswordEmpty}
+          helperText={isPasswordEmpty ? "Password wajib diisi" : undefined}
+        />
 
-          {passwordError && (
-            <p className="text-sm text-red-600 mt-1">Password wajib diisi</p>
-          )}
-        </div>
+        {serverError && (
+          <p className="text-destructive mt-1 text-sm">{serverError}</p>
+        )}
 
         <div className="text-right">
-          <Button variant="link" onClick={() => navigate("/forgot-password")}>
+          <Button
+            variant="link"
+            type="button"
+            onClick={() => navigate("/forgot-password")}
+          >
             Lupa Password?
           </Button>
         </div>
@@ -115,16 +119,25 @@ export default function LoginForm({ onSwitch }) {
           onClick={handleLogin}
           disabled={isLoading}
         >
-          {isLoading ? "Logging in..." : "Login"}
+          {isLoading ? (
+            <span className="flex items-center justify-center gap-2">
+              <Spinner />
+              <span>Logging in</span>
+            </span>
+          ) : (
+            "Login"
+          )}
         </Button>
 
-        <Button
-          variant="ghost"
-          className="w-full md:hidden"
-          onClick={onSwitch}
-        >
-          Belum punya akun? Register
-        </Button>
+        {onSwitch && (
+          <Button
+            variant="ghost"
+            className="w-full md:hidden"
+            onClick={onSwitch}
+          >
+            Belum punya akun? Register
+          </Button>
+        )}
       </div>
     </div>
   );

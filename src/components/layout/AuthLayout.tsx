@@ -3,7 +3,7 @@ export default function AuthLayout({
   sideTitle,
   sideText,
   sideAction,
-  showSide = true, // kalau mau hide panel kanan (mobile/full)
+  showSide = true,
 }: {
   children: React.ReactNode;
   sideTitle?: string;
@@ -12,19 +12,23 @@ export default function AuthLayout({
   showSide?: boolean;
 }) {
   return (
-    <div className="min-h-screen w-screen flex bg-white light">
-      {/* LEFT - form */}
-      <div className="flex-1 flex items-center justify-center p-6">
+    <div className="bg-background text-foreground flex min-h-screen w-screen">
+      {/* LEFT — form */}
+      <div className="flex flex-1 items-center justify-center p-6">
         {children}
       </div>
 
-      {/* RIGHT - optional branding (ke-visibility responsive) */}
+      {/* RIGHT — branding panel */}
       {showSide && (
-        <aside className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-b from-slate-800 to-slate-700 text-white p-10"
-               aria-hidden>
+        <aside
+          className="bg-primary text-primary-foreground hidden flex-1 items-center justify-center p-10 md:flex"
+          aria-hidden="true"
+        >
           <div className="max-w-xs text-center">
-            <h2 className="text-3xl font-bold mb-3">{sideTitle}</h2>
-            <p className="text-sm opacity-90 mb-6">{sideText}</p>
+            {sideTitle && (
+              <h2 className="mb-3 text-3xl font-bold">{sideTitle}</h2>
+            )}
+            {sideText && <p className="mb-6 text-sm opacity-90">{sideText}</p>}
             {sideAction}
           </div>
         </aside>

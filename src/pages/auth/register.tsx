@@ -1,10 +1,10 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import InputField from "@/components/form/InputField";
 import PasswordField from "@/components/form/PasswordField";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import { useRegisterMutation } from "@/services/api";
-import { useNavigate } from "react-router-dom";
 import { Spinner } from "@/components/ui/spinner";
+import { useRegisterMutation } from "@/services/api";
 
 export default function RegisterForm({ onSwitch }) {
   const navigate = useNavigate();
@@ -27,6 +27,7 @@ export default function RegisterForm({ onSwitch }) {
   const [confirm, setConfirm] = useState("");
   const [passwordMatch, setPasswordMatch] = useState(false);
 
+  /* ================= VALIDATION ================= */
   useEffect(() => {
     const passOK =
       password.length >= 6 &&
@@ -41,6 +42,7 @@ export default function RegisterForm({ onSwitch }) {
     setEmailValid(email.includes("@") || email.length === 0);
   }, [password, confirm, phone, email]);
 
+  /* ================= SUBMIT ================= */
   const handleSubmit = async () => {
     setSubmitted(true);
 
@@ -58,67 +60,47 @@ export default function RegisterForm({ onSwitch }) {
     }
 
     try {
-      const payload = {
+      await registerUser({
         first_name: firstName,
         last_name: lastName,
         phone_number: phone,
         email,
         password,
-      };
+      });
 
-      const res = await registerUser(payload).unwrap();
-
-      // setelah register → selalu ke OTP
       navigate("/otp", { state: { email } });
     } catch (err) {
       console.error("Registration error:", err);
     }
   };
 
+  /* ================= RENDER ================= */
   return (
     <div className="animate-slideInRight w-full max-w-md">
       <h1 className="mb-6 text-3xl font-bold">Register</h1>
 
       <div className="space-y-4">
         {/* NAMA */}
-        <div className="flex w-full gap-6">
-          <div className="flex-1">
-            <InputField
-              label="Nama Depan"
-              placeholder="Enter your first name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className={
-                submitted && !firstName
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : ""
-              }
-            />
-            {submitted && !firstName && (
-              <p className="mt-1 text-sm text-red-600">
-                Nama depan wajib diisi
-              </p>
-            )}
-          </div>
+        <div className="flex gap-6">
+          <InputField
+            label="Nama Depan"
+            placeholder="Enter your first name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            error={submitted && !firstName}
+            helperText={submitted && !firstName ? "Nama depan wajib diisi" : ""}
+          />
 
-          <div className="flex-1">
-            <InputField
-              label="Nama Belakang"
-              placeholder="Enter your last name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className={
-                submitted && !lastName
-                  ? "border-red-500 focus-visible:ring-red-500"
-                  : ""
-              }
-            />
-            {submitted && !lastName && (
-              <p className="mt-1 text-sm text-red-600">
-                Nama belakang wajib diisi
-              </p>
-            )}
-          </div>
+          <InputField
+            label="Nama Belakang"
+            placeholder="Enter your last name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            error={submitted && !lastName}
+            helperText={
+              submitted && !lastName ? "Nama belakang wajib diisi" : ""
+            }
+          />
         </div>
 
         {/* PHONE */}
@@ -127,17 +109,15 @@ export default function RegisterForm({ onSwitch }) {
           placeholder="Enter your phone number"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className={
-            submitted && (!phone || !phoneValid)
-              ? "border-red-500 focus-visible:ring-red-500"
-              : ""
+          error={submitted && (!phone || !phoneValid)}
+          helperText={
+            submitted && !phone
+              ? "Nomor HP wajib diisi"
+              : submitted && !phoneValid
+                ? "Nomor HP hanya boleh angka"
+                : ""
           }
         />
-        {submitted && (!phone || !phoneValid) && (
-          <p className="mt-1 text-sm text-red-600">
-            {phone ? "Nomor HP hanya boleh angka" : "Nomor HP wajib diisi"}
-          </p>
-        )}
 
         {/* EMAIL */}
         <InputField
@@ -145,17 +125,15 @@ export default function RegisterForm({ onSwitch }) {
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className={
-            submitted && (!email || !emailValid)
-              ? "border-red-500 focus-visible:ring-red-500"
-              : ""
+          error={submitted && (!email || !emailValid)}
+          helperText={
+            submitted && !email
+              ? "Email wajib diisi"
+              : submitted && !emailValid
+                ? "Format email tidak valid"
+                : ""
           }
         />
-        {submitted && (!email || !emailValid) && (
-          <p className="mt-1 text-sm text-red-600">
-            {email ? "Format email tidak valid" : "Email wajib diisi"}
-          </p>
-        )}
 
         {/* PASSWORD */}
         <PasswordField
@@ -163,16 +141,13 @@ export default function RegisterForm({ onSwitch }) {
           placeholder="Enter your password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className={
-            submitted && !passwordValid
-              ? "border-red-500 focus-visible:ring-red-500"
-              : ""
-          }
+          error={submitted && !passwordValid}
         />
+
         {password.length > 0 && (
           <p
             className={`text-sm ${
-              passwordValid ? "text-green-600" : "text-red-600"
+              passwordValid ? "text-green-600" : "text-destructive"
             }`}
           >
             Password minimal 6 karakter, huruf besar, angka, dan simbol
@@ -185,35 +160,29 @@ export default function RegisterForm({ onSwitch }) {
           placeholder="Enter your password"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          className={
-            submitted && !passwordMatch
-              ? "border-red-500 focus-visible:ring-red-500"
-              : ""
-          }
+          error={submitted && !passwordMatch}
         />
+
         {confirm.length > 0 && (
           <p
             className={`text-sm ${
-              passwordMatch ? "text-green-600" : "text-red-600"
+              passwordMatch ? "text-green-600" : "text-destructive"
             }`}
           >
             {passwordMatch ? "Password cocok" : "Password tidak cocok"}
           </p>
         )}
 
+        {/* SUBMIT */}
         <Button
           className="h-12 w-full"
           onClick={handleSubmit}
           disabled={isLoading}
         >
-          {isLoading ? (
-            <>
-              <Spinner className="text-white" />
-              Processing...
-            </>
-          ) : (
-            "Daftar"
-          )}
+          <span className="flex items-center justify-center gap-2">
+            {isLoading && <Spinner />}
+            {isLoading ? "Processing" : "Daftar"}
+          </span>
         </Button>
 
         <Button variant="ghost" className="w-full md:hidden" onClick={onSwitch}>
