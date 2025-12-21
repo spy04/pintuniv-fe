@@ -83,9 +83,10 @@ export default function SubscriptionPage() {
       <div className="mx-auto max-w-6xl space-y-10">
         {/* ===== HEADER ===== */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold">Plan & Pricing</h1>
+          <h1 className="text-3xl font-bold">Langganan Belajar di Pintu Universitas</h1>
           <p className="mt-2 text-gray-600">
-            Pilih paket terbaik untuk akses penuh Pintu Universitas
+            Belajar jadi makin gampang!
+Dari materi, latihan soal, tryout, analisis soal sampai jalur masuk universitas impian kamu, semua ada di sini!
           </p>
         </div>
 
@@ -108,19 +109,24 @@ export default function SubscriptionPage() {
                 </thead>
                 <tbody>
                   <tr>
+                    <td className="py-2">Pintu Universitas</td>
+                    <td className="text-center">❌</td>
+                    <td className="text-center">Akses penuh ke Informasi jalur masuk universitas</td>
+                  </tr>
+                  <tr>
                     <td className="py-2">Materi</td>
-                    <td className="text-center">Materi Awal</td>
-                    <td className="text-center">✔️</td>
+                    <td className="text-center">Materi Dasar</td>
+                    <td className="text-center">Semua materi lengkap dan update</td>
                   </tr>
                   <tr>
                     <td className="py-2">Latihan Soal</td>
-                    <td className="text-center">5 Soal</td>
-                    <td className="text-center">✔️</td>
+                    <td className="text-center">5 Latihan soal / bulan</td>
+                    <td className="text-center">Akses ke 10.000+ soal dan pembahasan</td>
                   </tr>
                   <tr>
                     <td className="py-2">Tryout</td>
-                    <td className="text-center">2 / bulan</td>
-                    <td className="text-center">✔️</td>
+                    <td className="text-center">2 tryout / bulan</td>
+                    <td className="text-center">Akses penuh ke 10+ tryout dengan ranking</td>
                   </tr>
                   <tr>
                     <td className="py-2">Analisis Otomatis</td>
@@ -135,7 +141,7 @@ export default function SubscriptionPage() {
           {/* ================= RIGHT ================= */}
           <Card>
             <CardContent className="space-y-6 p-6">
-              <h3 className="text-center font-semibold">Pilih Paket</h3>
+              <h3 className="text-center font-semibold">Pilih Paketmu</h3>
 
               {/* PILIHAN */}
               <div className="flex justify-center gap-2">
@@ -209,6 +215,7 @@ export default function SubscriptionPage() {
                   <p className="text-sm text-gray-600">
                     {selectedSub.deskripsi}
                   </p>
+                  <p>Langganan sekarang dan nikmati pengalaman belajar interaktif biar makin siap menuju kampus impian! 🚀</p>
 
                   <Button
                     className="mt-4"
