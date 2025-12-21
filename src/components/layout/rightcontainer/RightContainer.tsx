@@ -13,7 +13,7 @@ export default function RightContainer() {
       {/* Subscription */}
       <Card className="border-none p-0 shadow-none">
         <SubscriptionCard
-          isPro={user.profile?.is_pro}
+          isPro={!!user.profile?.is_pro}
           
           
           planName="Paket Premium"
