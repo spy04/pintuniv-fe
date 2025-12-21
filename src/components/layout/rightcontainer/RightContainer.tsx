@@ -3,6 +3,8 @@ import CalendarSliderCard from "./CalendarSliderCard";
 import { Card } from "@/components/ui/card";
 import { useGetUserQuery } from "@/services/api";
 
+
+
 export default function RightContainer() {
   const { data: user, isLoading } = useGetUserQuery();
 
