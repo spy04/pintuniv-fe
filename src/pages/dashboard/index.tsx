@@ -29,8 +29,6 @@ export default function DashboardUser() {
 
   return (
     <MainLayout>
-      <h1 className="pb-8 text-2xl font-bold">Dashboard</h1>
-
       <div
         style={{
           backgroundColor: "#FFFFFF",
